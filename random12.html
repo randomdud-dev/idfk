@@ -1,0 +1,740 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>System Dashboard</title>
+
+<style>
+
+#bgDots{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    pointer-events:none;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+    background:#0a0a0a;
+    color:#fff;
+    padding:40px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    font-size:2.5rem;
+    font-weight:300;
+    margin-bottom:25px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#111;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 0 20px rgba(255,255,255,.05);
+}
+
+.card h2{
+    margin-bottom:15px;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:10px;
+    padding-bottom:8px;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.info-row span:first-child{
+    opacity:.7;
+}
+
+button{
+    margin-top:15px;
+    background:#fff;
+    color:#000;
+    border:none;
+    border-radius:10px;
+    padding:12px 18px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+iframe{
+    width:100%;
+    height:450px;
+    border:none;
+    border-radius:12px;
+}
+
+.small{
+    opacity:.7;
+    font-size:.9rem;
+    margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bgDots"></canvas>
+
+<div class="container">
+
+<h1>System Dashboard</h1>
+
+<div class="grid">
+
+<div class="card">
+    <h2>System Information</h2>
+    <div id="systemInfo">Loading...</div>
+</div>
+
+<div class="card">
+    <h2>Location</h2>
+    <div id="locationInfo">Detecting location...</div>
+
+    <button onclick="getPreciseLocation()">
+        Get Precise Location
+    </button>
+
+    <div class="small">
+        Approximate location uses IP lookup.
+    </div>
+</div>
+
+</div>
+
+<div class="card" style="margin-top:20px">
+    <h2>Map</h2>
+
+    <div id="mapStatus"
+         style="margin-bottom:12px;
+                opacity:.8;
+                font-size:.95rem;">
+        Location Source: Unknown
+    </div>
+
+    <iframe id="map"></iframe>
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD_50N3_eROrf2bPb7QaO7c5CNL4Z6JIsE",
+    authDomain: "fire-store-2cc89.firebaseapp.com",
+    projectId: "fire-store-2cc89",
+    storageBucket: "fire-store-2cc89.firebasestorage.app",
+    messagingSenderId: "816790071643",
+    appId: "1:816790071643:web:99fd222f13e04b7d15d27e",
+    measurementId: "G-CT2NXQFK3C"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+
+async function saveTest() {
+   
+    if(localStorage.getItem("saved"))
+        return;
+
+    localStorage.setItem("saved", "true");
+
+    try {
+
+        await addDoc(
+            collection(db, "visitors"),
+            {
+                test: true,
+                time: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            }
+        );
+
+        console.log("Saved to Firestore");
+
+    } catch(err) {
+
+        console.error("Firestore error:", err);
+
+        localStorage.removeItem("saved");
+
+    }
+}
+
+           {
+   
+    os: detectOS(),
+    platform: navigator.platform,
+    userAgent: navigator.userAgent,
+
+    language: navigator.language,
+    languages: navigator.languages,
+
+    cpuThreads: navigator.hardwareConcurrency,
+    memory: navigator.deviceMemory,
+
+    screenWidth: screen.width,
+    screenHeight: screen.height,
+
+    availWidth: screen.availWidth,
+    availHeight: screen.availHeight,
+
+    windowWidth: window.innerWidth,
+    windowHeight: window.innerHeight,
+
+    pixelRatio: window.devicePixelRatio,
+    colorDepth: screen.colorDepth,
+
+    timezone:
+        Intl.DateTimeFormat()
+            .resolvedOptions()
+            .timeZone,
+
+    online: navigator.onLine,
+
+    cookiesEnabled:
+        navigator.cookieEnabled,
+
+    currentUrl: location.href,
+
+    referrer:
+        document.referrer || "Direct Visit"
+}
+
+        );
+
+document.addEventListener(
+    "click",
+    saveTest,
+    { once: true }
+);
+
+function addRow(label,value){
+    return `
+    <div class="info-row">
+        <span>${label}</span>
+        <span>${value}</span>
+    </div>`;
+}
+
+async function loadSystemInfo(){
+
+    let html = "";
+
+    html += addRow("Operating System", detectOS());
+
+    html += addRow(
+        "Platform",
+        navigator.platform || "Unknown"
+    );
+
+    html += addRow(
+        "User Agent",
+        navigator.userAgent
+    );
+
+    html += addRow(
+        "Language",
+        navigator.language || "Unknown"
+    );
+
+    html += addRow(
+        "Languages",
+        navigator.languages
+            ? navigator.languages.join(", ")
+            : "Unknown"
+    );
+
+    html += addRow(
+        "CPU Threads",
+        navigator.hardwareConcurrency || "Unknown"
+    );
+
+    html += addRow(
+        "Memory (GB)",
+        navigator.deviceMemory || "Unknown"
+    );
+
+    html += addRow(
+        "Screen Resolution",
+        `${screen.width} × ${screen.height}`
+    );
+
+    html += addRow(
+        "Available Screen",
+        `${screen.availWidth} × ${screen.availHeight}`
+    );
+
+    html += addRow(
+        "Window Size",
+        `${window.innerWidth} × ${window.innerHeight}`
+    );
+
+    html += addRow(
+        "Pixel Ratio",
+        window.devicePixelRatio
+    );
+
+    html += addRow(
+        "Color Depth",
+        screen.colorDepth
+    );
+
+    html += addRow(
+        "Timezone",
+        Intl.DateTimeFormat()
+            .resolvedOptions()
+            .timeZone
+    );
+
+    html += addRow(
+        "Current Time",
+        new Date().toLocaleString()
+    );
+
+    html += addRow(
+        "Touch Support",
+        ('ontouchstart' in window)
+            ? "Yes"
+            : "No"
+    );
+
+    html += addRow(
+        "Online",
+        navigator.onLine
+            ? "Yes"
+            : "No"
+    );
+
+    html += addRow(
+        "Cookies Enabled",
+        navigator.cookieEnabled
+            ? "Yes"
+            : "No"
+    );
+
+    html += addRow(
+        "Current URL",
+        location.href
+    );
+
+    html += addRow(
+        "Referrer",
+        document.referrer || "Direct Visit"
+    );
+
+    const gpu = getWebGLInfo();
+
+    if(gpu){
+
+        html += addRow(
+            "GPU Vendor",
+            gpu.vendor
+        );
+
+        html += addRow(
+            "GPU Renderer",
+            gpu.renderer
+        );
+    }
+
+    if("connection" in navigator){
+
+        const c = navigator.connection;
+
+        html += addRow(
+            "Network Type",
+            c.effectiveType || "Unknown"
+        );
+
+        html += addRow(
+            "Downlink",
+            c.downlink
+                ? `${c.downlink} Mbps`
+                : "Unknown"
+        );
+
+        html += addRow(
+            "RTT",
+            c.rtt
+                ? `${c.rtt} ms`
+                : "Unknown"
+        );
+    }
+
+    if("getBattery" in navigator){
+
+        try{
+
+            const battery =
+                await navigator.getBattery();
+
+            html += addRow(
+                "Battery",
+                `${Math.round(
+                    battery.level * 100
+                )}%`
+            );
+
+            html += addRow(
+                "Charging",
+                battery.charging
+                    ? "Yes"
+                    : "No"
+            );
+
+        }catch{}
+    }
+
+    document.getElementById(
+        "systemInfo"
+    ).innerHTML = html;
+}
+
+function detectOS() {
+    const ua = navigator.userAgent;
+
+    if (ua.includes("Windows")) return "Windows";
+    if (ua.includes("Mac")) return "macOS";
+    if (ua.includes("Linux")) return "Linux";
+    if (ua.includes("Android")) return "Android";
+    if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
+
+    return "Unknown";
+}
+
+function getWebGLInfo() {
+
+    try {
+
+        const canvas = document.createElement("canvas");
+
+        const gl =
+            canvas.getContext("webgl") ||
+            canvas.getContext("experimental-webgl");
+
+        if (!gl) return null;
+
+        const debugInfo =
+            gl.getExtension(
+                "WEBGL_debug_renderer_info"
+            );
+
+        if (!debugInfo) return null;
+
+        return {
+            vendor: gl.getParameter(
+                debugInfo.UNMASKED_VENDOR_WEBGL
+            ),
+            renderer: gl.getParameter(
+                debugInfo.UNMASKED_RENDERER_WEBGL
+            )
+        };
+
+    } catch {
+
+        return null;
+    }
+}
+
+async function loadApproximateLocation(){
+
+    const locationDiv =
+        document.getElementById("locationInfo");
+
+    const map =
+        document.getElementById("map");
+
+    try{
+
+        let locationData = null;
+
+        try{
+
+            const response =
+                await fetch("https://ipapi.co/json/");
+
+            const data =
+                await response.json();
+
+            if(data.latitude && data.longitude){
+
+                locationData = {
+                    city:data.city,
+                    region:data.region,
+                    country:data.country_name,
+                    lat:data.latitude,
+                    lon:data.longitude,
+                    ip:data.ip
+                };
+            }
+
+        }catch(e){}
+
+        if(!locationData){
+
+            try{
+
+                const response =
+                    await fetch("https://ipwho.is/");
+
+                const data =
+                    await response.json();
+
+                locationData = {
+                    city:data.city,
+                    region:data.region,
+                    country:data.country,
+                    lat:data.latitude,
+                    lon:data.longitude,
+                    ip:data.ip
+                };
+
+            }catch(e){}
+        }
+
+        if(!locationData){
+            throw new Error("Location lookup failed");
+        }
+
+        locationDiv.innerHTML = `
+            <strong>Approximate Location</strong><br><br>
+
+            City: ${locationData.city || "Unknown"}<br>
+            Region: ${locationData.region || "Unknown"}<br>
+            Country: ${locationData.country || "Unknown"}<br>
+            IP: ${locationData.ip || "Unknown"}<br><br>
+
+            Latitude: ${locationData.lat}<br>
+            Longitude: ${locationData.lon}
+        `;
+
+document.getElementById("mapStatus").innerHTML =
+    "Location Source: Approximate (IP-Based)";
+
+        map.src =
+            `https://maps.google.com/maps?q=${locationData.lat},${locationData.lon}&z=11&output=embed`;
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        locationDiv.innerHTML = `
+            Unable to determine approximate location.<br><br>
+            If you're opening this file directly from your computer,
+            try running it from a local web server.
+        `;
+    }
+}
+
+function getPreciseLocation(){
+
+    if(!navigator.geolocation){
+
+        alert("Geolocation not supported.");
+
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position){
+
+            const lat =
+                position.coords.latitude;
+
+            const lon =
+                position.coords.longitude;
+
+            document.getElementById("locationInfo")
+            .innerHTML = `
+                <strong>Precise Location</strong><br><br>
+
+                Latitude: ${lat}<br>
+                Longitude: ${lon}
+            `;
+
+document.getElementById("mapStatus").innerHTML =
+    "Location Source: Precise (GPS)";
+            document.getElementById("map").src =
+
+                `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+
+        },
+
+        function(error){
+
+            alert(
+                "Location permission denied or unavailable."
+            );
+        }
+
+    );
+}
+
+(async () => {
+
+    await loadSystemInfo();
+    loadApproximateLocation();
+
+const canvas = document.getElementById("bgDots");
+const ctx = canvas.getContext("2d");
+
+let mouse = {
+    x: -9999,
+    y: -9999
+};
+
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+window.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+const spacing = 22;
+const dots = [];
+
+function buildDots(){
+
+    dots.length = 0;
+
+    for(let x = 0; x <= canvas.width; x += spacing){
+
+        for(let y = 0; y <= canvas.height; y += spacing){
+
+            dots.push({
+                baseX: x,
+                baseY: y,
+                x: x,
+                y: y
+            });
+
+        }
+    }
+}
+
+buildDots();
+window.addEventListener("resize", buildDots);
+
+function animate(){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    for(const dot of dots){
+
+        const dx = dot.baseX - mouse.x;
+        const dy = dot.baseY - mouse.y;
+
+        const distance =
+            Math.sqrt(dx * dx + dy * dy);
+
+        let targetX = dot.baseX;
+        let targetY = dot.baseY;
+
+        const radius = 120;
+
+        if(distance < radius){
+
+            const force =
+                (radius - distance) / radius;
+
+            const push =
+                force * 35;
+
+            targetX =
+                dot.baseX +
+                (dx / Math.max(distance,1))
+                * push;
+
+            targetY =
+                dot.baseY +
+                (dy / Math.max(distance,1))
+                * push;
+        }
+
+        dot.x +=
+            (targetX - dot.x) * 0.08;
+
+        dot.y +=
+            (targetY - dot.y) * 0.08;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            dot.x,
+            dot.y,
+            1.5,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "rgba(255,255,255,0.18)";
+
+        ctx.fill();
+    }
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+animate();
+
+})();
+
+</script>
+
+</body>
+</html>
+
+
