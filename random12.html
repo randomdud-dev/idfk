@@ -197,48 +197,6 @@ async function saveTest() {
     }
 }
 
-           {
-   
-    os: detectOS(),
-    platform: navigator.platform,
-    userAgent: navigator.userAgent,
-
-    language: navigator.language,
-    languages: navigator.languages,
-
-    cpuThreads: navigator.hardwareConcurrency,
-    memory: navigator.deviceMemory,
-
-    screenWidth: screen.width,
-    screenHeight: screen.height,
-
-    availWidth: screen.availWidth,
-    availHeight: screen.availHeight,
-
-    windowWidth: window.innerWidth,
-    windowHeight: window.innerHeight,
-
-    pixelRatio: window.devicePixelRatio,
-    colorDepth: screen.colorDepth,
-
-    timezone:
-        Intl.DateTimeFormat()
-            .resolvedOptions()
-            .timeZone,
-
-    online: navigator.onLine,
-
-    cookiesEnabled:
-        navigator.cookieEnabled,
-
-    currentUrl: location.href,
-
-    referrer:
-        document.referrer || "Direct Visit"
-}
-
-        );
-
 document.addEventListener(
     "click",
     saveTest,
