@@ -1,0 +1,1476 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Advanced System Dashboard</title>
+
+<style>
+
+:root{
+
+    --bg:#0f172a;
+    --card:rgba(255,255,255,.06);
+    --accent:#3b82f6;
+    --text:white;
+}
+
+body{
+
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    transition:.3s;
+}
+
+.hidden{
+    display:none;
+}
+
+#bgDots{
+
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+}
+
+#topBar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 24px;
+
+    position:sticky;
+    top:0;
+
+    z-index:50;
+
+    background:rgba(0,0,0,.35);
+
+    backdrop-filter:blur(12px);
+}
+
+#tabs{
+    display:flex;
+    gap:12px;
+}
+
+button{
+
+    border:none;
+    padding:12px 18px;
+
+    border-radius:12px;
+
+    background:var(--accent);
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+
+    transform:translateY(-2px);
+    opacity:.9;
+}
+
+.container{
+
+    max-width:1300px;
+    margin:auto;
+    padding:24px;
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.card{
+
+    background:var(--card);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    padding:22px;
+
+    backdrop-filter:blur(14px);
+
+    box-shadow:
+    0 0 30px rgba(0,0,0,.25);
+}
+
+.info-row{
+
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:12px;
+    gap:20px;
+}
+
+iframe{
+
+    width:100%;
+    height:420px;
+
+    border:none;
+
+    border-radius:18px;
+}
+
+#fpsCounter{
+
+    color:#60a5fa;
+    font-weight:bold;
+}
+
+#micCanvas{
+
+    width:100%;
+    height:140px;
+
+    background:rgba(0,0,0,.25);
+
+    border-radius:14px;
+}
+
+#reactionBox{
+
+    margin-top:20px;
+
+    padding:70px;
+
+    border-radius:16px;
+
+    background:#ef4444;
+
+    text-align:center;
+
+    font-size:1.4rem;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    user-select:none;
+}
+
+#reactionGraph{
+
+    width:100%;
+    margin-top:20px;
+
+    background:rgba(255,255,255,.05);
+
+    border-radius:14px;
+}
+
+#aimCanvas{
+
+    width:100%;
+    height:520px;
+
+    min-height:520px;
+
+    display:block;
+
+    margin-top:20px;
+
+    border-radius:16px;
+
+    background:rgba(0,0,0,.25);
+
+    cursor:crosshair;
+}
+
+#settingsBtn{
+
+    position:fixed;
+
+    right:20px;
+    bottom:20px;
+
+    width:60px;
+    height:60px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.1);
+
+    backdrop-filter:blur(10px);
+
+    border:none;
+
+    color:white;
+
+    font-size:1.4rem;
+
+    z-index:100;
+
+    opacity:.8;
+}
+
+#settingsPanel{
+
+    position:fixed;
+
+    right:20px;
+    bottom:90px;
+
+    width:320px;
+
+    padding:24px;
+
+    border-radius:24px;
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.1);
+
+    backdrop-filter:blur(18px);
+
+    z-index:100;
+}
+
+.settingGroup{
+    margin-top:22px;
+}
+
+.settingGroup h3{
+    margin-bottom:12px;
+}
+
+body.lightMode{
+
+    --bg:#e5e7eb;
+    --card:rgba(255,255,255,.7);
+    --text:#111827;
+}
+
+body.midnight{
+
+    --bg:#050510;
+    --card:rgba(35,20,60,.35);
+    --accent:#6d28d9;
+}
+
+body.forest{
+
+    --bg:#06110a;
+    --card:rgba(10,40,20,.35);
+    --accent:#15803d;
+}
+
+body.ocean{
+
+    --bg:#06111f;
+    --card:rgba(20,40,80,.35);
+    --accent:#2563eb;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="bgDots"></canvas>
+
+<div id="topBar">
+
+<div id="tabs">
+
+<button onclick="showMainTab('system')">
+SYSTEM
+</button>
+
+<button onclick="showMainTab('comp')">
+COMP
+</button>
+
+</div>
+
+<div id="fpsCounter">
+FPS 0
+</div>
+
+</div>
+
+<!-- SYSTEM TAB -->
+
+<div id="systemTab" class="container">
+
+<h1>Advanced System Dashboard</h1>
+
+<div class="card">
+
+<h2>Microphone Visualizer</h2>
+
+<canvas id="micCanvas"></canvas>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>System Information</h2>
+
+<div id="systemInfo"></div>
+
+</div>
+
+<div class="card">
+
+<h2>Location</h2>
+
+<div id="locationInfo">
+Loading...
+</div>
+
+<button onclick="getPreciseLocation()">
+Precise Location
+</button>
+
+</div>
+
+</div>
+
+<div class="card" style="margin-top:20px">
+
+<h2>Map</h2>
+
+<iframe id="map"></iframe>
+
+</div>
+
+</div>
+
+<!-- COMP TAB -->
+
+<div id="compTab"
+class="container hidden">
+
+<h1>Competitive Features</h1>
+
+<div id="compSubTabs">
+
+<button onclick="showCompTab('reaction')">
+Reaction
+</button>
+
+<button onclick="showCompTab('aim')">
+Aim Trainer
+</button>
+
+</div>
+
+<!-- REACTION -->
+
+<div id="reactionSection">
+
+<div class="card">
+
+<div id="reactionBox">
+START
+</div>
+
+<div
+id="reactionResult"
+style="margin-top:20px">
+</div>
+
+<canvas
+id="reactionGraph"
+width="800"
+height="240">
+</canvas>
+
+<button
+style="margin-top:20px"
+onclick="startReactionTest()">
+Start Reaction Test
+</button>
+
+</div>
+
+</div>
+
+<!-- AIM -->
+
+<div
+id="aimSection"
+class="hidden">
+
+<div class="card">
+
+<div id="aimControls">
+
+<button onclick="setAimTime(30000)">
+30s
+</button>
+
+<button onclick="setAimTime(60000)">
+1m
+</button>
+
+<button onclick="setAimTime(300000)">
+5m
+</button>
+
+<button onclick="setAimSpeed('slow')">
+Slow
+</button>
+
+<button onclick="setAimSpeed('medium')">
+Medium
+</button>
+
+<button onclick="setAimSpeed('fast')">
+Fast
+</button>
+
+<button onclick="startAimTrainer()">
+Start
+</button>
+
+</div>
+
+<div
+id="aimStats"
+style="margin-top:20px">
+</div>
+
+<canvas id="aimCanvas"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SETTINGS -->
+
+<button id="settingsBtn">
+⚙
+</button>
+
+<div
+id="settingsPanel"
+class="hidden">
+
+<h2>Appearance</h2>
+
+<div class="settingGroup">
+
+<h3>Theme</h3>
+
+<button onclick="setTheme('dark')">
+Dark
+</button>
+
+<button onclick="setTheme('light')">
+Light
+</button>
+
+</div>
+
+<div class="settingGroup">
+
+<h3>Schemes</h3>
+
+<button onclick="setScheme('default')">
+Default
+</button>
+
+<button onclick="setScheme('midnight')">
+Midnight
+</button>
+
+<button onclick="setScheme('forest')">
+Forest
+</button>
+
+<button onclick="setScheme('ocean')">
+Ocean
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* =========================
+STATE
+========================= */
+
+const state = {
+
+    reactionHistory:[],
+
+    aimHits:0,
+    aimMisses:0,
+
+    aimRunning:false,
+
+    aimSpeed:"medium",
+
+    aimTime:30000
+};
+
+/* =========================
+MAIN TABS
+========================= */
+
+function showMainTab(tab){
+
+    document
+    .getElementById("systemTab")
+    .classList.add("hidden");
+
+    document
+    .getElementById("compTab")
+    .classList.add("hidden");
+
+    if(tab === "system"){
+
+        document
+        .getElementById("systemTab")
+        .classList.remove("hidden");
+    }
+
+    if(tab === "comp"){
+
+        document
+        .getElementById("compTab")
+        .classList.remove("hidden");
+
+        setTimeout(
+            resizeAimCanvas,
+            100
+        );
+    }
+}
+
+/* =========================
+COMP TABS
+========================= */
+
+function showCompTab(tab){
+
+    document
+    .getElementById("reactionSection")
+    .classList.add("hidden");
+
+    document
+    .getElementById("aimSection")
+    .classList.add("hidden");
+
+    if(tab === "reaction"){
+
+        document
+        .getElementById("reactionSection")
+        .classList.remove("hidden");
+    }
+
+    if(tab === "aim"){
+
+        document
+        .getElementById("aimSection")
+        .classList.remove("hidden");
+
+        setTimeout(
+            resizeAimCanvas,
+            100
+        );
+    }
+}
+
+/* =========================
+SYSTEM INFO
+========================= */
+
+async function loadSystemInfo(){
+
+    let gpu = "Unknown";
+
+    try{
+
+        const canvas =
+        document.createElement("canvas");
+
+        const gl =
+        canvas.getContext("webgl");
+
+        const debug =
+        gl.getExtension(
+            "WEBGL_debug_renderer_info"
+        );
+
+        gpu =
+        gl.getParameter(
+            debug.UNMASKED_RENDERER_WEBGL
+        );
+
+    }catch{}
+
+    let batteryText =
+    "Unsupported";
+
+    try{
+
+        const battery =
+        await navigator.getBattery();
+
+        batteryText =
+        `${Math.floor(
+            battery.level * 100
+        )}%`;
+
+    }catch{}
+
+    document
+    .getElementById("systemInfo")
+    .innerHTML = `
+
+    <div class="info-row">
+        <span>CPU Threads</span>
+        <span>
+            ${navigator.hardwareConcurrency}
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span>RAM</span>
+        <span>
+            ${navigator.deviceMemory || "?"} GB
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span>GPU</span>
+        <span>${gpu}</span>
+    </div>
+
+    <div class="info-row">
+        <span>Battery</span>
+        <span>${batteryText}</span>
+    </div>
+
+    <div class="info-row">
+        <span>Resolution</span>
+        <span>
+            ${screen.width}x${screen.height}
+        </span>
+    </div>
+    `;
+}
+
+loadSystemInfo();
+
+/* =========================
+LOCATION
+========================= */
+
+async function loadLocation(){
+
+    try{
+
+        const res =
+        await fetch(
+            "https://ipapi.co/json"
+        );
+
+        const data =
+        await res.json();
+
+        document
+        .getElementById(
+            "locationInfo"
+        )
+        .innerHTML = `
+
+        ${data.city}<br>
+        ${data.region}<br>
+        ${data.country_name}<br>
+        ${data.ip}
+        `;
+
+        document
+        .getElementById("map")
+        .src =
+
+        `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=12&output=embed`;
+
+    }catch{
+
+        document
+        .getElementById(
+            "locationInfo"
+        )
+        .innerHTML =
+        "Location failed";
+    }
+}
+
+loadLocation();
+
+function getPreciseLocation(){
+
+    navigator.geolocation
+    .getCurrentPosition(pos=>{
+
+        const lat =
+        pos.coords.latitude;
+
+        const lon =
+        pos.coords.longitude;
+
+        document
+        .getElementById(
+            "locationInfo"
+        )
+        .innerHTML = `
+
+        ${lat}<br>
+        ${lon}
+        `;
+
+        document
+        .getElementById("map")
+        .src =
+
+        `https://maps.google.com/maps?q=${lat},${lon}&z=14&output=embed`;
+    });
+}
+
+/* =========================
+FPS
+========================= */
+
+let fpsFrames = 0;
+
+let fpsLast =
+performance.now();
+
+function fpsLoop(){
+
+    fpsFrames++;
+
+    const now =
+    performance.now();
+
+    if(now > fpsLast + 1000){
+
+        document
+        .getElementById(
+            "fpsCounter"
+        )
+        .innerText =
+
+        `FPS ${fpsFrames}`;
+
+        fpsFrames = 0;
+
+        fpsLast = now;
+    }
+
+    requestAnimationFrame(
+        fpsLoop
+    );
+}
+
+fpsLoop();
+
+/* =========================
+MIC VISUALIZER
+========================= */
+
+async function initMic(){
+
+    const micCanvas =
+    document.getElementById(
+        "micCanvas"
+    );
+
+    const micCtx =
+    micCanvas.getContext("2d");
+
+    micCanvas.width =
+    micCanvas.offsetWidth;
+
+    micCanvas.height = 140;
+
+    try{
+
+        const stream =
+        await navigator
+        .mediaDevices
+        .getUserMedia({
+            audio:true
+        });
+
+        const audioCtx =
+        new AudioContext();
+
+        const analyser =
+        audioCtx.createAnalyser();
+
+        analyser.fftSize = 256;
+
+        const source =
+        audioCtx
+        .createMediaStreamSource(
+            stream
+        );
+
+        source.connect(analyser);
+
+        const bufferLength =
+        analyser.frequencyBinCount;
+
+        const dataArray =
+        new Uint8Array(bufferLength);
+
+        function drawMic(){
+
+            requestAnimationFrame(
+                drawMic
+            );
+
+            analyser
+            .getByteFrequencyData(
+                dataArray
+            );
+
+            micCtx.clearRect(
+                0,
+                0,
+                micCanvas.width,
+                micCanvas.height
+            );
+
+            const width =
+            micCanvas.width /
+            bufferLength;
+
+            let x = 0;
+
+            for(let i=0;i<bufferLength;i++){
+
+                const h =
+                dataArray[i];
+
+                micCtx.fillStyle =
+                `rgb(${h},120,255)`;
+
+                micCtx.fillRect(
+                    x,
+                    micCanvas.height-h,
+                    width-2,
+                    h
+                );
+
+                x += width;
+            }
+        }
+
+        drawMic();
+
+    }catch(err){
+
+        console.log(err);
+    }
+}
+
+initMic();
+
+/* =========================
+REACTION TEST
+========================= */
+
+let reactionStart = 0;
+
+function startReactionTest(){
+
+    const box =
+    document.getElementById(
+        "reactionBox"
+    );
+
+    box.style.background =
+    "#ef4444";
+
+    box.innerHTML =
+    "WAIT...";
+
+    const delay =
+    1000 + Math.random() * 3000;
+
+    setTimeout(()=>{
+
+        reactionStart =
+        performance.now();
+
+        box.style.background =
+        "#22c55e";
+
+        box.innerHTML =
+        "CLICK";
+
+    },delay);
+}
+
+document
+.getElementById("reactionBox")
+.addEventListener(
+    "click",
+    ()=>{
+
+        if(
+            document
+            .getElementById(
+                "reactionBox"
+            )
+            .innerHTML !== "CLICK"
+        ) return;
+
+        const time =
+        Math.floor(
+            performance.now()
+            - reactionStart
+        );
+
+        state.reactionHistory
+        .push(time);
+
+        drawReactionGraph();
+
+        document
+        .getElementById(
+            "reactionResult"
+        )
+        .innerHTML =
+
+        `Reaction: ${time}ms`;
+    }
+);
+
+function drawReactionGraph(){
+
+    const graph =
+    document.getElementById(
+        "reactionGraph"
+    );
+
+    const ctx =
+    graph.getContext("2d");
+
+    ctx.clearRect(
+        0,
+        0,
+        graph.width,
+        graph.height
+    );
+
+    const values =
+    state.reactionHistory;
+
+    if(values.length < 2)
+        return;
+
+    const max =
+    Math.max(...values);
+
+    const min =
+    Math.min(...values);
+
+    ctx.beginPath();
+
+    values.forEach((v,i)=>{
+
+        const x =
+        (i/(values.length-1))
+        * graph.width;
+
+        const y =
+        graph.height -
+        (
+            (v-min)/(max-min+1)
+        ) * graph.height * .8;
+
+        if(i===0){
+
+            ctx.moveTo(x,y);
+
+        }else{
+
+            ctx.lineTo(x,y);
+        }
+    });
+
+    ctx.strokeStyle =
+    "#3b82f6";
+
+    ctx.lineWidth = 4;
+
+    ctx.stroke();
+}
+
+/* =========================
+AIM TRAINER
+========================= */
+
+const aimCanvas =
+document.getElementById(
+    "aimCanvas"
+);
+
+const aimCtx =
+aimCanvas.getContext("2d");
+
+let aimTargets = [];
+
+function resizeAimCanvas(){
+
+    aimCanvas.width =
+    aimCanvas.offsetWidth;
+
+    aimCanvas.height = 520;
+}
+
+resizeAimCanvas();
+
+window.addEventListener(
+    "resize",
+    resizeAimCanvas
+);
+
+function setAimTime(ms){
+
+    state.aimTime = ms;
+}
+
+function setAimSpeed(speed){
+
+    state.aimSpeed = speed;
+}
+
+function spawnAimTarget(){
+
+    let velocity = 1;
+
+    if(state.aimSpeed === "slow")
+        velocity = 0.5;
+
+    if(state.aimSpeed === "medium")
+        velocity = 1.2;
+
+    if(state.aimSpeed === "fast")
+        velocity = 2.5;
+
+    aimTargets.push({
+
+        x:Math.random()
+        * aimCanvas.width,
+
+        y:Math.random()
+        * aimCanvas.height,
+
+        r:22,
+
+        vx:
+        (Math.random()-.5)
+        * velocity,
+
+        vy:
+        (Math.random()-.5)
+        * velocity
+    });
+}
+
+function aimLoop(){
+
+    requestAnimationFrame(
+        aimLoop
+    );
+
+    aimCtx.clearRect(
+        0,
+        0,
+        aimCanvas.width,
+        aimCanvas.height
+    );
+
+    for(const t of aimTargets){
+
+        t.x += t.vx;
+        t.y += t.vy;
+
+        if(
+            t.x < 0 ||
+            t.x > aimCanvas.width
+        ) t.vx *= -1;
+
+        if(
+            t.y < 0 ||
+            t.y > aimCanvas.height
+        ) t.vy *= -1;
+
+        aimCtx.beginPath();
+
+        aimCtx.arc(
+            t.x,
+            t.y,
+            t.r,
+            0,
+            Math.PI*2
+        );
+
+        aimCtx.fillStyle =
+        "#3b82f6";
+
+        aimCtx.fill();
+
+        aimCtx.beginPath();
+
+        aimCtx.arc(
+            t.x,
+            t.y,
+            8,
+            0,
+            Math.PI*2
+        );
+
+        aimCtx.fillStyle =
+        "white";
+
+        aimCtx.fill();
+    }
+}
+
+aimLoop();
+
+aimCanvas.addEventListener(
+    "click",
+    e=>{
+
+        if(!state.aimRunning)
+            return;
+
+        const rect =
+        aimCanvas
+        .getBoundingClientRect();
+
+        const x =
+        e.clientX - rect.left;
+
+        const y =
+        e.clientY - rect.top;
+
+        let hit = false;
+
+        aimTargets =
+        aimTargets.filter(t=>{
+
+            const dx = x - t.x;
+            const dy = y - t.y;
+
+            const dist =
+            Math.sqrt(dx*dx+dy*dy);
+
+            if(dist < t.r){
+
+                hit = true;
+
+                return false;
+            }
+
+            return true;
+        });
+
+        if(hit){
+
+            state.aimHits++;
+
+        }else{
+
+            state.aimMisses++;
+        }
+
+        updateAimStats();
+    }
+);
+
+function updateAimStats(){
+
+    document
+    .getElementById(
+        "aimStats"
+    )
+    .innerHTML = `
+
+    Hits:
+    ${state.aimHits}
+
+    |
+    Misses:
+    ${state.aimMisses}
+    `;
+}
+
+function startAimTrainer(){
+
+    resizeAimCanvas();
+
+    state.aimRunning = true;
+
+    state.aimHits = 0;
+    state.aimMisses = 0;
+
+    aimTargets = [];
+
+    updateAimStats();
+
+    const interval =
+    setInterval(
+        spawnAimTarget,
+        800
+    );
+
+    setTimeout(()=>{
+
+        clearInterval(interval);
+
+        state.aimRunning = false;
+
+    },state.aimTime);
+}
+
+/* =========================
+INTERACTIVE DOTS
+========================= */
+
+const bg =
+document.getElementById(
+    "bgDots"
+);
+
+const bgCtx =
+bg.getContext("2d");
+
+let mouseX = -9999;
+let mouseY = -9999;
+
+function resizeBG(){
+
+    bg.width =
+    window.innerWidth;
+
+    bg.height =
+    window.innerHeight;
+}
+
+resizeBG();
+
+window.addEventListener(
+    "resize",
+    resizeBG
+);
+
+const dots = [];
+
+function buildDots(){
+
+    dots.length = 0;
+
+    for(
+        let x=0;
+        x<window.innerWidth;
+        x+=24
+    ){
+
+        for(
+            let y=0;
+            y<window.innerHeight;
+            y+=24
+        ){
+
+            dots.push({
+
+                homeX:x,
+                homeY:y,
+
+                x:x,
+                y:y,
+
+                vx:0,
+                vy:0
+            });
+        }
+    }
+}
+
+buildDots();
+
+window.addEventListener(
+    "resize",
+    buildDots
+);
+
+document.addEventListener(
+    "mousemove",
+    e=>{
+
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    }
+);
+
+function dotsLoop(){
+
+    requestAnimationFrame(
+        dotsLoop
+    );
+
+    bgCtx.clearRect(
+        0,
+        0,
+        bg.width,
+        bg.height
+    );
+
+    for(const d of dots){
+
+        const dx =
+        d.x - mouseX;
+
+        const dy =
+        d.y - mouseY;
+
+        const dist =
+        Math.sqrt(dx*dx+dy*dy);
+
+        const radius = 120;
+
+        if(dist < radius){
+
+            const force =
+            (radius-dist)/radius;
+
+            const angle =
+            Math.atan2(dy,dx);
+
+            d.vx +=
+            Math.cos(angle)
+            * force * 2.2;
+
+            d.vy +=
+            Math.sin(angle)
+            * force * 2.2;
+        }
+
+        d.vx +=
+        (d.homeX-d.x)*0.02;
+
+        d.vy +=
+        (d.homeY-d.y)*0.02;
+
+        d.vx *= 0.92;
+        d.vy *= 0.92;
+
+        d.x += d.vx;
+        d.y += d.vy;
+
+        bgCtx.beginPath();
+
+        bgCtx.arc(
+            d.x,
+            d.y,
+            1.4,
+            0,
+            Math.PI*2
+        );
+
+        bgCtx.fillStyle =
+        "rgba(255,255,255,.24)";
+
+        bgCtx.fill();
+    }
+}
+
+dotsLoop();
+
+/* =========================
+SETTINGS
+========================= */
+
+const settingsBtn =
+document.getElementById(
+    "settingsBtn"
+);
+
+const settingsPanel =
+document.getElementById(
+    "settingsPanel"
+);
+
+settingsBtn.onclick = ()=>{
+
+    settingsPanel.classList.toggle(
+        "hidden"
+    );
+};
+
+function setTheme(mode){
+
+    document.body.classList.remove(
+        "lightMode"
+    );
+
+    if(mode === "light"){
+
+        document.body.classList.add(
+            "lightMode"
+        );
+    }
+}
+
+function setScheme(name){
+
+    document.body.classList.remove(
+        "midnight",
+        "forest",
+        "ocean"
+    );
+
+    if(name !== "default"){
+
+        document.body.classList.add(
+            name
+        );
+    }
+}
+
+</script>
+
+</body>
+</html>
+
