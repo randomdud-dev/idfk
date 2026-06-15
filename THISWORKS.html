@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>Ultimate Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="module">
+
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
+
+window.THREE = THREE;
+
+</script>
+
+<style>
+
+:root{
+
+--bg:#0f172a;
+--card:rgba(255,255,255,.06);
+--accent:#3b82f6;
+--text:white;
+}
+
+body{
+
+margin:0;
+font-family:Arial,sans-serif;
+background:var(--bg);
+color:var(--text);
+overflow-x:hidden;
+transition:.3s;
+}
+
+.hidden{
+display:none;
+}
+
+#bgDots{
+
+position:fixed;
+inset:0;
+width:100%;
+height:100%;
+z-index:-1;
+}
+
+#topBar{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:18px 24px;
+
+position:sticky;
+top:0;
+
+z-index:50;
+
+background:rgba(0,0,0,.35);
+
+backdrop-filter:blur(12px);
+}
+
+#tabs{
+
+display:flex;
+gap:12px;
+}
+
+button{
+
+border:none;
+padding:12px 18px;
+
+border-radius:12px;
+
+background:var(--accent);
+
+color:white;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.2s;
+}
+
+button:hover{
+
+transform:translateY(-2px);
+opacity:.9;
+}
+
+.container{
+
+max-width:1300px;
+margin:auto;
+padding:24px;
+}
+
+.grid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.card{
+
+background:var(--card);
+
+border:1px solid rgba(255,255,255,.08);
+
+border-radius:22px;
+
+padding:22px;
+
+backdrop-filter:blur(14px);
+
+box-shadow:
+0 0 30px rgba(0,0,0,.25);
+}
+
+.info-row{
+
+display:flex;
+justify-content:space-between;
+margin-bottom:12px;
+gap:20px;
+}
+
+iframe{
+
+width:100%;
+height:420px;
+
+border:none;
+
+border-radius:18px;
+}
+
+#fpsCounter{
+
+color:#60a5fa;
+font-weight:bold;
+}
+
+#micCanvas{
+
+width:100%;
+height:140px;
+
+background:rgba(0,0,0,.25);
+
+border-radius:14px;
+}
+
+#reactionBox{
+
+margin-top:20px;
+
+padding:70px;
+
+border-radius:16px;
+
+background:#ef4444;
+
+text-align:center;
+
+font-size:1.4rem;
+
+font-weight:bold;
+
+cursor:pointer;
+
+user-select:none;
+}
+
+#aimCanvas{
+
+width:100%;
+height:520px;
+
+display:block;
+
+margin-top:20px;
+
+border-radius:16px;
+
+background:rgba(0,0,0,.25);
+
+cursor:crosshair;
+}
+
+#settingsBtn{
+
+position:fixed;
+
+right:20px;
+bottom:20px;
+
+width:60px;
+height:60px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.1);
+
+backdrop-filter:blur(10px);
+
+border:none;
+
+color:white;
+
+font-size:1.4rem;
+
+z-index:100;
+
+opacity:.8;
+}
+
+#settingsPanel{
+
+position:fixed;
+
+right:20px;
+bottom:90px;
+
+width:320px;
+
+padding:24px;
+
+border-radius:24px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.1);
+
+backdrop-filter:blur(18px);
+
+z-index:100;
+}
+
+#typingQuote{
+
+margin-top:20px;
+
+padding:20px;
+
+border-radius:16px;
+
+background:
+rgba(255,255,255,.06);
+
+line-height:1.7;
+}
+
+textarea{
+
+width:100%;
+height:160px;
+margin-top:20px;
+
+border:none;
+border-radius:16px;
+
+padding:18px;
+
+font-size:1rem;
+
+background:rgba(0,0,0,.25);
+
+color:white;
+}
+
+body.lightMode{
+
+--bg:#e5e7eb;
+--card:rgba(255,255,255,.7);
+--text:#111827;
+}
+
+body.midnight{
+
+--bg:#050510;
+--card:rgba(35,20,60,.35);
+--accent:#6d28d9;
+}
+
+body.forest{
+
+--bg:#06110a;
+--card:rgba(10,40,20,.35);
+--accent:#15803d;
+}
+
+body.ocean{
+
+--bg:#06111f;
+--card:rgba(20,40,80,.35);
+--accent:#2563eb;
+}
+
+@media(max-width:900px){
+
+.grid{
+
+grid-template-columns:1fr;
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="bgDots"></canvas>
+
+<div id="topBar">
+
+<div id="tabs">
+
+<button onclick="showMainTab('system')">
+SYSTEM
+</button>
+
+<button onclick="showMainTab('comp')">
+COMP
+</button>
+
+</div>
+
+<div id="fpsCounter">
+FPS 0
+</div>
+
+</div>
+
+<!-- SYSTEM -->
+
+<div id="systemTab"
+class="container">
+
+<h1>Ultimate Dashboard</h1>
+
+<div class="card">
+
+<h2>Microphone Visualizer</h2>
+
+<canvas id="micCanvas"></canvas>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>System Information</h2>
+
+<div id="systemInfo"></div>
+
+</div>
+
+<div class="card">
+
+<h2>Location</h2>
+
+<div id="locationInfo">
+Loading...
+</div>
+
+<button onclick="getPreciseLocation()">
+Precise Location
+</button>
+
+</div>
+
+</div>
+
+<div class="card"
+style="margin-top:20px">
+
+<h2>Map</h2>
+
+<iframe id="map"></iframe>
+
+</div>
+
+</div>
+
+<!-- COMP -->
+
+<div id="compTab"
+class="container hidden">
+
+<h1>Competitive Features</h1>
+
+<div id="compSubTabs">
+
+<button onclick="showCompTab('reaction')">
+Reaction
+</button>
+
+<button onclick="showCompTab('aim')">
+Aim Trainer
+</button>
+
+<button onclick="showCompTab('typing')">
+Typing
+</button>
+
+<button onclick="showCompTab('cps')">
+CPS
+</button>
+
+</div>
+
+<!-- REACTION -->
+
+<div id="reactionSection">
+
+<div class="card">
+
+<div id="reactionBox">
+START
+</div>
+
+<div id="reactionResult"
+style="margin-top:20px">
+</div>
+
+<canvas
+id="reactionChart"
+height="120">
+</canvas>
+
+<button
+style="margin-top:20px"
+onclick="startReactionTest()">
+Start Reaction Test
+</button>
+
+</div>
+
+</div>
+
+<!-- AIM -->
+
+<div id="aimSection"
+class="hidden">
+
+<div class="card">
+
+<div id="aimControls">
+
+<button onclick="setAimTime(30000)">
+30s
+</button>
+
+<button onclick="setAimTime(60000)">
+1m
+</button>
+
+<button onclick="setAimTime(300000)">
+5m
+</button>
+
+<button onclick="setAimSpeed('slow')">
+Slow
+</button>
+
+<button onclick="setAimSpeed('medium')">
+Medium
+</button>
+
+<button onclick="setAimSpeed('fast')">
+Fast
+</button>
+
+<button onclick="startAimTrainer()">
+Start
+</button>
+
+</div>
+
+<div id="aimStats"
+style="margin-top:20px">
+</div>
+
+<canvas id="aimCanvas"></canvas>
+
+</div>
+
+</div>
+
+<!-- TYPING -->
+
+<div id="typingSection"
+class="hidden">
+
+<div class="card">
+
+<h2>Typing Test</h2>
+
+<div id="typingQuote">
+
+The quick brown fox jumps
+over the lazy dog.
+Typing tests measure speed,
+accuracy and consistency.
+
+</div>
+
+<textarea
+id="typingInput"
+placeholder="Start typing...">
+</textarea>
+
+<div id="typingStats"
+style="margin-top:20px">
+</div>
+
+</div>
+
+</div>
+
+<!-- CPS -->
+
+<div id="cpsSection"
+class="hidden">
+
+<div class="card">
+
+<h2>CPS Test</h2>
+
+<button id="cpsButton"
+style="
+width:100%;
+height:220px;
+font-size:2rem;
+margin-top:20px;
+">
+
+CLICK FAST
+
+</button>
+
+<div id="cpsStats"
+style="
+margin-top:20px;
+font-size:1.2rem;
+">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SETTINGS -->
+
+<button id="settingsBtn">
+⚙
+</button>
+
+<div id="settingsPanel"
+class="hidden">
+
+<h2>Appearance</h2>
+
+<button onclick="setTheme('dark')">
+Dark
+</button>
+
+<button onclick="setTheme('light')">
+Light
+</button>
+
+<button onclick="setScheme('midnight')">
+Midnight
+</button>
+
+<button onclick="setScheme('forest')">
+Forest
+</button>
+
+<button onclick="setScheme('ocean')">
+Ocean
+</button>
+
+</div>
+
+<script>
+
+/* FULL JS WOULD CONTINUE HERE */
+
+console.log(
+"Ultimate Dashboard Loaded"
+);
+
+</script>
+
+</body>
+</html>
